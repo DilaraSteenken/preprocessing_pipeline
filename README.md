@@ -9,4 +9,6 @@ preprocess images in the following order:
 7- atlas_overlay_visualisation
 8- suvr
 9- parcellation
-Only run the tracer specific template creation script if you want to create a template. 
+
+!! Only run the tracer specific template creation script if you want to create a template. 
+!! if emission/transmiion PET scanner. First mask the second animals out, rotate the animal at the top, so that always only one animal in each nii file and create a separate study-specific tracer template as no teeth holder was used at the time. (They do not align with the PET/CT scanner template). For this purpose, run the split_door_animal.py script and then rotate_door_animal.py script, before atlas registration, check image origins if different, run set origin and then run atlas registration. 
