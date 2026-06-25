@@ -9,4 +9,4 @@ preprocess images in the following order:
 7- atlas_overlay_visualisation
 8- suvr
 9- parcellation
-
+Only run the tracer specific template creation script if you want to create a template. 
