@@ -7,24 +7,36 @@ from nilearn import image, plotting
 import pandas as pd
 import os
 import re
+import yaml
+from pathlib import Path
 
-##################################################################################################################################################
+################################################################################################################
+# loading working directory
+project_dir = Path(r"/home/user/dsteenken/PycharmProjects/preprocessing_pipeline/")
+config_path = project_dir / "config_local.yml"
+with open(config_path, "r", encoding="utf-8") as f:
+    config = yaml.safe_load(f)
+settings = config["parcellation"]
 ## define folders
-main_folder = r'/home/user/dsteenken/data16/Dsteenken/Rats_Database/' # replace with your directory
+main_folder = settings["main_folder"] # replace with your directory
 # these should be the same if in bids format
 sub_folder = 'raw' # where raw data is
 sub_folder_derivatives = 'derivatives' # where the preprocessed data and the other infos are going to be
 sub_folder_preproc = 'preproc' # preprocessed data is saved
-df = pd.read_excel(os.path.join(main_folder, 'mediso_data_summary.xlsx')) # load your data table with your name
-atlas = image.load_img(r"/home/user/dsteenken/data16/Dsteenken/Rats_Database/derivatives/atlases/Rat_W.Schiffer/Px_Rat_W.Schiffer.nii.gz") # load schiffer rat atlas
+project = settings["project"]
+df = settings["df"]
+df = pd.read_excel(os.path.join(main_folder, sub_folder, project, df)) # load your data table with your name
+atlas_img = settings["atlas_img"]
+atlas = image.load_img(atlas_img) # load schiffer rat atlas
 atlas_data = atlas.get_fdata() # get the data
 labels = np.unique(atlas_data) # get the unique labels for each region
 print(labels) # print labels
 
 # load text file with the regions to label later
-atlas_txt = r"/home/user/dsteenken/data16/Dsteenken/Rats_Database/derivatives/atlases/Rat_W.Schiffer/Px_Rat_W.Schiffer.txt"
+atlas_text = settings["atlas_text"]
+#atlas_txt = atlas_text.split("\n")
 # t -> tab separated, no header row
-lut = pd.read_csv(atlas_txt, sep="\t", header=None, names=["label_full", "label_short", "id", "color", "description"])
+lut = pd.read_csv(atlas_text, sep="\t", header=None, names=["label_full", "label_short", "id", "color", "description"])
 lut["id"] = lut["id"].astype(int) # have the ids as int
 
 ## loop through data table

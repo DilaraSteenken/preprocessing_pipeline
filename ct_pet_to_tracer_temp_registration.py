@@ -10,20 +10,30 @@ import pandas as pd
 import nibabel as nib
 from nilearn import image, plotting
 from matplotlib import pyplot as plt
+import yaml
+from pathlib import Path
 #######################################################################################################################
+# loading working directory
+project_dir = Path(r"/home/user/dsteenken/PycharmProjects/preprocessing_pipeline/")
+config_path = project_dir / "config_local.yml"
+with open(config_path, "r", encoding="utf-8") as f:
+    config = yaml.safe_load(f)
+settings = config["ct_pet_2_tracer"]
 ## define folders
-main_folder = r'/home/user/dsteenken/data16/Dsteenken/Rats_Database/' # replace with your directory
+main_folder = settings["main_folder"] # replace with your directory
 # these should be the same if in bids format
 sub_folder = 'raw' # where raw data is
 sub_folder_derivatives = 'derivatives' # where the preprocessed data and the other infos are going to be
 sub_folder_preproc = 'preproc' # preprocessed data is saved
 ## load data table
-df = pd.read_excel(os.path.join(main_folder, 'mediso_data_summary.xlsx')) # load your data table with your name
+project = settings["project"]
+df = settings["df"]
+df = pd.read_excel(os.path.join(main_folder, sub_folder, project, df)) # load your data table with your name
 
 # templates for each ucbh (46 images) and fdg (101 images) were created and they are used as fixed image to be registered so that they are in the same space for cropping
-fixed_ucbh_img = r'/home/user/dsteenken/data16/Dsteenken/Rats_Database/derivatives/templates/baseline_ucbh_template.nii.gz' # ucbh template
+fixed_ucbh_img = settings["ucbh_template"]
 print(f'Fixed {fixed_ucbh_img}') # can comment out
-fixed_fdg_img = r'/home/user/dsteenken/data16/Dsteenken/Rats_Database/derivatives/templates/baseline_fdg_template.nii.gz' # fdg template
+fixed_fdg_img = settings["fdg_template"] # fdg template
 print(f'Fixed {fixed_fdg_img}') # can comment out
 
 # if you have the data table and all the info in it, you can loop through the table

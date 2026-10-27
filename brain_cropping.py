@@ -11,16 +11,26 @@ import re
 import nibabel as nib
 from nilearn import plotting
 import matplotlib.pyplot as plt
+import yaml
+from pathlib import Path
 
-#######################################################################################################################
+################################################################################################################
+# loading working directory
+project_dir = Path(r"/home/user/dsteenken/PycharmProjects/preprocessing_pipeline/")
+config_path = project_dir / "config_local.yml"
+with open(config_path, "r", encoding="utf-8") as f:
+    config = yaml.safe_load(f)
+settings = config["brain_cropping"]
 ## define folders
-main_folder = r'/home/user/dsteenken/data16/Dsteenken/Rats_Database/' # replace with your directory
+main_folder = settings["main_folder"] # replace with your directory
 # these should be the same if in bids format
 sub_folder = 'raw' # where raw data is
 sub_folder_derivatives = 'derivatives' # where the preprocessed data and the other infos are going to be
 sub_folder_preproc = 'preproc' # preprocessed data is saved
 ## load data table
-df = pd.read_excel(os.path.join(main_folder, 'mediso_data_summary.xlsx')) # load your data table with your name
+project = settings["project"]
+df = settings["df"]
+df = pd.read_excel(os.path.join(main_folder, sub_folder, project, df)) # load your data table with your name
 
 # loop through rows
 for idx, row in df.iterrows():
@@ -48,8 +58,12 @@ for idx, row in df.iterrows():
 
     ## create mask for cropping based on the templates so that you keep the whole brain, you can arrange the 1s and the 0s based on your images, but they should fit these masks as they are registered to the same average template
     mask = np.zeros_like(data, dtype=bool) # create a mask same as the data matrix with zeros
-    mask[70:150, 115:165, 50:165] = True # voxels that should be included in the mask are 1, not included 0, this is for fdg
-    #mask[70:150, 115:165, 40:153] = True # this is for ucbh if you do not have ucbh leave it commented out, otherwise first crop fdg and then comment out fdg and uncomment this to crop ucbh
+    if tracer == 'fdg':
+        mask[70:150, 115:165, 40:165] = True # voxels that should be included in the mask are 1, not included 0, this is for fdg
+    elif tracer == 'ucbh':
+        mask[70:150, 115:165, 36:179] = True # this is for ucbh if you do not have ucbh leave it commented out, otherwise first crop fdg and then comment out fdg and uncomment this to crop ucbh
+    else:
+        print('no matching tracer')
 
     cropped_img = data * mask # to create the cropped image by multiplying the data with the mask
 
@@ -58,7 +72,7 @@ for idx, row in df.iterrows():
     ax[0].axis('off')
     ax[1].imshow(cropped_img[:, 140, :].T, cmap='gray', origin='lower')
     ax[1].axis('off')
-    ax[2].imshow(cropped_img[:, :, 100].T, cmap='gray', origin='lower')
+    ax[2].imshow(cropped_img[:, :, 70].T, cmap='gray', origin='lower')
     ax[2].axis('off')
     plt.show()
 

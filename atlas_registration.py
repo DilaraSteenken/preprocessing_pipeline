@@ -8,18 +8,28 @@ import openpyxl as xl
 import nibabel as nib
 from nilearn import image, plotting
 from matplotlib import pyplot as plt
+import yaml
+from pathlib import Path
 
-##################################################################################################################################################
+################################################################################################################
+# loading working directory
+project_dir = Path(r"/home/user/dsteenken/PycharmProjects/preprocessing_pipeline/")
+config_path = project_dir / "config_local.yml"
+with open(config_path, "r", encoding="utf-8") as f:
+    config = yaml.safe_load(f)
+settings = config["atlas_reg"]
 ## define folders
-main_folder = r'/home/user/dsteenken/data16/Dsteenken/Rats_Database/' # replace with your directory
+main_folder = settings["main_folder"] # replace with your directory
 # these should be the same if in bids format
 sub_folder = 'raw' # where raw data is
 sub_folder_derivatives = 'derivatives' # where the preprocessed data and the other infos are going to be
 sub_folder_preproc = 'preproc' # preprocessed data is saved
 # load data table
-df = pd.read_excel(os.path.join(main_folder, 'mediso_data_summary.xlsx')) # load your data table with your name
+project = settings["project"]
+df = settings["df"]
+df = pd.read_excel(os.path.join(main_folder, sub_folder, project, df)) # load your data table with your name
 # define atlas
-atlas_img = r"/home/user/dsteenken/data16/Dsteenken/Rats_Database/derivatives/atlases/Rat_W.Schiffer/normalization/Rat_W.Schiffer_FDG.nii.gz"
+atlas_img = settings["atlas_img"]
 
 ## loop through data table
 for idx, row in df.iterrows():
